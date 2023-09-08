@@ -19,7 +19,7 @@ async def sc_mux_neuron_tb(dut):
     for i in range(dut.K.value):
         dut.sel.value[i] = random.randint(0, 1) 
 
-    clock = Clock(dut.clk, 2)  # Create a 10us period clock on port clk
+    clock = Clock(dut.clk, 2, units="us")  # Create a 10us period clock on port clk
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
     
