@@ -10,47 +10,45 @@ import random
 
 
 
+# Generate the binary number based on the probabilities as a string
+
 @cocotb.test()
 async def sc_mux_neuron_tb(dut):
-
+    probabilities = [0.3, 0.2, 0.1, 0.8, 0.2, 0.5, 0.7, 0.4]
     # Set initial input value to prevent it from floating
     dut.din.value = random.randint(0, 7)
     dut.sel.value = random.randint(0, 2)
 
-    clock = Clock(dut.clk, 2)  # Create a 10us period clock on port clk
+    clock = Clock(dut.clk, 10)  # Create a 10us period clock on port clk
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
     
     await RisingEdge(dut.clk)
 
     
-    for i in range(10): # 10 experiments
-        N = 256
+    for i in range(3): # 10 experiments
+        N = 1024
         output = 0
         for _ in range(N):
-            # Generate random input streams with probabilities -0.4 and 0.6
-            # for i in range(dut.N.value):
-            #     dut.din.value[i] = random.randint(0, 1) 
-            # for i in range(dut.K.value):
-            #     dut.sel.value[i] = random.randint(0, 1) 
 
-            dut.din.value = random.randint(0, 7)
-            dut.sel.value = random.randint(0, 2) 
+            binary_string = "".join(str(int(random.random() < p)) for p in probabilities)
+
+            # Convert the binary string to an integer
+            binary_number = int(binary_string, 2)
+
+            dut.din.value = binary_number
+            dut.sel.value = random.randint(0, 7) 
             
             await RisingEdge(dut.clk)
-            print(dut.din.value)
-            print(dut.sel.value)
 
             # Calculate expected output based on select
             output += dut.dout.value
-           
-            
+
         pc = output / N
-        c = 2 * pc - 1
-        # assert output == (a + b)/2.0, f"Failed on the {i}th experiment. Got {output}, expected {(a + b)/2.0}"
+
+
         print(f"Test {i}:")
-        print(f"Expected Prob: 0.5 \t Prob Output: {pc}")
-        print(f"Expected value: 0.5 \t Output: {c}")
+        print(f"Expected Prob: {sum(probabilities) / len(probabilities)} \t Prob Output: {pc}")
 
 
 
