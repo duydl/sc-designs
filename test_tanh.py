@@ -36,11 +36,11 @@ async def sc_tanh_tb(dut):
             
             await RisingEdge(dut.clk)
             # Debug
-            # print(_)
-            # print(f"y = {dut.y.value}")
-            # print(f"x = {dut.x.value}")
-            # print(f"state = {dut.current_state.value}")
-            # print(f"nextstate = {dut.next_state.value}")
+            print(_)
+            print(f"y = {dut.y.value}")
+            print(f"x = {dut.x.value}")
+            print(f"state = {dut.current_state.value}")
+            print(f"nextstate = {dut.next_state.value}")
             y += dut.y.value
            
         y_range.append(y/N)

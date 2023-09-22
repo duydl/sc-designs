@@ -1,4 +1,4 @@
-module sc_mnist_network
+module sc_mnist_network_old
   #(
     // Input
     parameter N0 = 784,
@@ -19,10 +19,10 @@ module sc_mnist_network
     input wire [N0-1:0] din, // Input size
 
     input wire [N0-1:0] weight_0 [0:N1-1],
-
+    input wire [K1:0] sel1 [0:N1-1], //select signal for layer 1
 
     input wire [N1-1:0] weight_1 [0:N2-1], 
-
+    input wire [K2:0] sel2 [0:N2-1], //select signal for layer 2
 
     output wire [N2-1:0] dout // Output size
   );
@@ -32,11 +32,12 @@ module sc_mnist_network
   generate
     genvar i;
     for (i = 0; i < N1; i = i + 1) begin
-      sc_apc_neuron #(.K(K1)) neuron1_inst (
+      sc_mux_neuron #(.K(K1)) neuron1_inst (
         .clk(clk),
         .reset(reset),
         .din(din),
         .weight(weight_0[i]),
+        .sel(sel1[i]),
         .dout(layer1_output[i])
       );
     end
@@ -47,9 +48,10 @@ module sc_mnist_network
   generate
     genvar j;
     for (j = 0; j < N2; j = j + 1) begin
-      sc_apc_neuron #(.K(K2)) neuron2_inst (
+      sc_mux_n_1 #(.K(K2)) neuron2_inst (
         .din(layer1_output),
         .weight(weight_1[j]),
+        .sel(sel2[j]),
         .dout(layer2_output[j])
       );
     end

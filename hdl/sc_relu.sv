@@ -1,9 +1,9 @@
 // sc_tanh.sv
 
-// `timescale 1us/1ns
+`timescale 1us/1ns
 
 
-// module sc_tanh(
+// module sc_abs(
 //     input logic clk,
 //     input logic reset,
 //     input logic x,
@@ -74,16 +74,19 @@
 //         S15: if (x) next_state = S15;
 //         else next_state = S14;
 //     endcase
-//     y = (current_state[-1] == 1'b1);
+
+//     if (current_state[3] == 1'b0)
+//         y = (current_state[0] == 1'b0);
+//     else
+//         y = (current_state[0] == 1'b1);
 // end
 
     
 // endmodule
 
 
-// `timescale 1us/1ns
 
-module sc_tanh (
+module sc_relu (
     input logic clk,
     input logic reset,
     input logic x,
@@ -105,13 +108,16 @@ always @(current_state, x) begin
         0: if (x) next_state = 0; 
             else next_state = 1;
 
-        2**S-1: if (x) next_state = (2**S-1) - 1;         
-                        else next_state = (2**S-1) - 2;
+        (2**S-1): if (x) next_state = (2**S-1) - 2;         
+                        else next_state = (2**S-1) - 1;
 
-        default: if (x) next_state = current_state + 1;
-                 else next_state = current_state - 1;
+        default: if (x) next_state = current_state - 1;
+                 else next_state = current_state + 1;
     endcase
-    y = (current_state[S-1] == 1'b1); // Output based on odd/even state
+    if (current_state[S-1] == 1'b0)
+        y = (current_state[0] == 1'b0);
+    else
+        y = (current_state[0] == 1'b1);
 end
 
 endmodule
