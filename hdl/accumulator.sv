@@ -1,18 +1,19 @@
-module accumulator (
+module accumulator 
+#(  parameter K = 3,
+    parameter N = 2**K
+
+)
+(
     input wire clk,
-    input logic [7:0] data_in, // Adjust the width based on your parameter
-    output logic [3:0] count
+    input logic [N-1:0] data_in, // Adjust the width based on your parameter
+    output logic [K:0] count
 );
-
-parameter NUM_BITS = 8; // Change this parameter to match the number of input bits
-
-reg [3:0] count_tem = 0;
-
- // Initialize the count to zero
+// Initialize the count to zero
+reg [K:0] count_tem = 0;
 
 generate
     genvar i;
-    for (i = 0; i < NUM_BITS; i = i + 1) begin : counter_loop
+    for (i = 0; i < N; i = i + 1) begin : counter_loop
         always @(posedge data_in[i]) begin
             if (data_in[i]) begin
                 count_tem = count_tem + 1;

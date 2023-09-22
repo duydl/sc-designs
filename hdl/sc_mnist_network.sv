@@ -48,6 +48,8 @@ module sc_mnist_network
     genvar j;
     for (j = 0; j < N2; j = j + 1) begin
       sc_apc_neuron #(.K(K2)) neuron2_inst (
+        .clk(clk),
+        .reset(reset),
         .din(layer1_output),
         .weight(weight_1[j]),
         .dout(layer2_output[j])

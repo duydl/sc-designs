@@ -3,6 +3,7 @@ from cocotb.clock import Clock
 from cocotb.triggers import Timer, RisingEdge, FallingEdge, ClockCycles
 
 import random
+import numpy as np
 
 '''
 1. Testbench
@@ -11,10 +12,10 @@ import random
 @cocotb.test()
 async def sc_apc_neuron(dut):
 
-
+    x_range = np.linspace(0,1,41)
     # Set initial input value to prevent it from floating
     dut.din.value = 4
-    dut.weight.value = 7
+    dut.weight.value = 255
     
     clock = Clock(dut.clk, 10, units="us")  # Create a 10us period clock on port clk
     # Start the clock. Start it low to avoid issues on the first RisingEdge
@@ -22,33 +23,34 @@ async def sc_apc_neuron(dut):
     
     await RisingEdge(dut.clk)
 
-    
-    for i in range(10): # 10 experiments
-        N = 10
-        output = 0
+    y_range = []
+    for x in x_range: 
+        x = 0.8
+        N = 1024
+        y = 0
         dut.reset.value = 1
         await RisingEdge(dut.clk)
         dut.reset.value = 0
         for _ in range(N):
-            # Generate random input streams with probabilities -0.4 and 0.6
-            # dut.a.value = 1 if random.uniform(0, 1) < pa else 0
-            # dut.b.value = 1 if random.uniform(0, 1) < pb else 0
-            # dut.select.value = random.randint(0, 1)  # Set select to 0.5
+            
+            dut.din.value = 1*int(random.uniform(0, 1) < x) + 2*int(random.uniform(0, 1) < x) + 4*int(random.uniform(0, 1) < x) + 8*int(random.uniform(0, 1) < x) + 16*int(random.uniform(0, 1) < x)  + 32*int(random.uniform(0, 1) < x) + 64*int(random.uniform(0, 1) < x)  + 128*int(random.uniform(0, 1) < x) 
             
             await RisingEdge(dut.clk)
             
-            
             # Calculate expected output based on select
-            output += dut.dout.value
-            print(dut.current_state.value)
-            print(dut.count.value)
+            y += dut.dout.value
+            # if _ % 100 == 0:
+            print(_)
+            print("current state", dut.current_state.value)
+            print("count", dut.count.value)
+            print("mem", dut.mem1.value)
+            # print("N/2", dut.N.value)
            
             
-        pc = output / N
-        # c = 2 * pc - 1
-        # assert output == (a + b)/2.0, f"Failed on the {i}th experiment. Got {output}, expected {(a + b)/2.0}"
-        print(f"Test {i}:")
-        print(f" Prob Output: {pc}")
+        y_range.append(y/N)
+    with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out_apc_neuron.txt", "w") as f:
+        print(list(x_range), file=f)
+        print(list(y_range), file=f)
 
 
 
@@ -61,7 +63,7 @@ import pytest
 import glob
 
 
-def test_add():
+def test_apc_neuron():
 
     run(
         verilog_sources=glob.glob('hdl/*'),

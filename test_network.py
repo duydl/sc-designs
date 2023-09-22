@@ -20,9 +20,7 @@ def list_to_binary(arr):
 '''
 
 @cocotb.test()
-async def sc_mux_neuron_tb(dut):
-
-
+async def sc_network_tb(dut):
 
     func = np.vectorize(lambda x: int(random.random() < x))
 
@@ -56,8 +54,8 @@ async def sc_mux_neuron_tb(dut):
     await RisingEdge(dut.clk)
     dut.reset.value = 0
 
-    
-    for i, test_image in enumerate(test_images[0:1]): # 10 experiments
+   
+    for i, test_image in enumerate(test_images[6:7]): # 10 experiments
         
         N = 1024
         output = 0
@@ -73,8 +71,8 @@ async def sc_mux_neuron_tb(dut):
 
             dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
             dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
-            dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
-            dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
+            # dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
+            # dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
 
             
             # print(len([list_to_binary(x) for x in func(layer_weights[1].T)]), [list_to_binary(x) for x in func(layer_weights[1].T)])
@@ -85,8 +83,7 @@ async def sc_mux_neuron_tb(dut):
             # print("input," , dut.din.value)
             print("output", dut.dout.value)
             # print("weight", dut.weight_1.value[6])
-            print("output layer", dut.layer1_output.value)
-            print("output layer", dut.layer1_output.value)
+            # print("output layer", dut.layer1_output.value)
 
             # Calculate expected output based on select
             # if "x" in str(dut.dout.value):
@@ -100,8 +97,8 @@ async def sc_mux_neuron_tb(dut):
         pc = output / N
 
 
-        print(f"Test {i}:")
-        print(f"Expected Prob: {test_labels[i]} \t Prob Output: {pc}")
+        print(f"Test {6}:")
+        print(f"Expected Prob: {test_labels[6]} \t Prob Output: {pc}")
 
 
 
@@ -114,7 +111,7 @@ import pytest
 import glob
 
 
-def test_mux_neuron():
+def test_network():
 
     run(
         verilog_sources=glob.glob('hdl/*'),
