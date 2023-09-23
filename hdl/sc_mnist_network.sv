@@ -13,21 +13,24 @@ module sc_mnist_network
     
   )
   (
-    input wire clk,
-    input wire reset,
+    input logic clk,
+    input logic reset,
 
-    input wire [N0-1:0] din, // Input size
+    input logic [N0-1:0] din, // Input size
 
-    input wire [N0-1:0] weight_0 [0:N1-1],
+    input logic [N0-1:0] weight_0 [0:N1-1],
 
 
-    input wire [N1-1:0] weight_1 [0:N2-1], 
+    input logic [N1-1:0] weight_1 [0:N2-1], 
 
 
     output logic [N2-1:0] dout // Output size
   );
 
-  wire [N1-1:0] layer1_output; // Output of the first layer
+  reg [N1-1:0] layer1_output; // Output of the first layer
+  reg [N0-1:0] mem1 [0:N1-1];
+  reg [7:0] states [0:N1-1];
+  reg [K1:0] count [0:N1-1];
   // Instantiate N1 neurons for the first layer
   generate
     genvar i;
@@ -37,6 +40,9 @@ module sc_mnist_network
         .reset(reset),
         .din(din),
         .weight(weight_0[i]),
+        .count(count[i]),
+        .mem1(mem1[i]),
+        .current_state(states[i]),
         .dout(layer1_output[i])
       );
     end
@@ -57,11 +63,12 @@ module sc_mnist_network
     end
   endgenerate
 
-  always @(posedge clk, posedge reset) begin
-    if (reset)
-      dout <= 0; // Initial state
-    else
-      dout <= layer2_output;      
-    end
+  assign dout = layer2_output;
+  // always @(posedge clk, posedge reset) begin
+  //   if (reset)
+  //     dout <= 0; // Initial state
+  //   else
+  //     dout <= layer2_output;      
+  //   end
 
 endmodule

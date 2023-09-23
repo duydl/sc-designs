@@ -57,13 +57,13 @@ module sc_mnist_network_old
     end
   endgenerate
 
-  reg mem;
-  always @(posedge clk, posedge reset) begin
-    if (reset)
-      mem <= 0; // Initial state
-    else
-      mem <= layer2_output;      
-    end
+  // reg mem;
+  // always @(posedge clk, posedge reset) begin
+  //   if (reset)
+  //     mem <= 0; // Initial state
+  //   else
+  //     mem <= layer2_output;      
+  //   end
 
-    assign dout = mem;
+  assign dout = layer2_output;
 endmodule

@@ -23,8 +23,9 @@ def list_to_binary(arr):
 async def sc_network_tb(dut):
 
     func = np.vectorize(lambda x: int(random.random() < x))
+    # func = np.vectorize(lambda x: 0 if x < 0.5 else 1)
 
-# Create a model with the same architecture as the original model
+    # Create a model with the same architecture as the original model
     model = Sequential([
     Flatten(input_shape=(28, 28, 1)),
     Dense(128, activation='relu'),
@@ -41,9 +42,9 @@ async def sc_network_tb(dut):
             if weights:
                 layer_weights.append((1 + weights[0])/2)
 
-    (_, _), (test_images, test_labels) = mnist.load_data()
-    test_images = test_images.reshape((10000, 28, 28, 1))
-    test_images = test_images.astype('float32') / 255
+    (_, _), (test_images1, test_labels) = mnist.load_data()
+    test_images1 = test_images1.reshape((10000, 28, 28, 1))
+    test_images = test_images1.astype('float32') / 255
 
     clock = Clock(dut.clk, 10)  
 
@@ -51,38 +52,48 @@ async def sc_network_tb(dut):
     cocotb.start_soon(clock.start(start_high=False))
     
 
-   
-    for i, test_image in enumerate(test_images[6:7]): # 10 experiments
+    a, b = 77,78
+    for i, test_image in enumerate(test_images[a:b]): # 10 experiments
         
-        N = 1024
+        N = 64
         n = N
         output = 0
+        
         dut.reset.value = 1
+        await RisingEdge(dut.clk)
+
+        dut.din.value = list_to_binary( func( (1+test_image.flatten()) /2 ))
+        # dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
+        # dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
+
+        dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
+        dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
+        
         await RisingEdge(dut.clk)
         dut.reset.value = 0
 
         for _ in range(N):
             print(_)
 
-            dut.din.value = list_to_binary( func(test_image.flatten()))
-            print("input__", list_to_binary( func(test_image.flatten())))
+            dut.din.value = list_to_binary( func( (1+test_image.flatten()) /2 ))
+            # print("input__", list_to_binary( func( (1+test_image.flatten()) /2 )))
             # dut.sel1.value = [random.randint(0,784) for i in range(128)]
             # dut.sel2.value = [random.randint(0,128) for i in range(10)]
             
 
-            dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
-            dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
-            # dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
-            # dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
+            # dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
+            # dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
+            dut.weight_0.value = [int("1"*len(x), 2) for x in func(layer_weights[0].T)]
+            dut.weight_1.value = [int("1"*len(x), 2) for x in func(layer_weights[1].T)]
 
-            
-            # print(len([list_to_binary(x) for x in func(layer_weights[1].T)]), [list_to_binary(x) for x in func(layer_weights[1].T)])
-
+            # await FallingEdge(dut.clk)
             await RisingEdge(dut.clk)
-            # await RisingEdge(dut.clk)
-            # print(len(dut.weight_1.value) ,dut.weight_1.value)
-            # print("input," , dut.din.value)
+
             print("input", dut.din.value)
+            print("weight", dut.weight_0.value[4])
+            print("mem1", dut.mem1.value[0])
+            print("count", dut.count.value)
+            print("states", dut.states.value)
             print("layer 1", dut.layer1_output.value)
             print("layer 2", dut.dout.value)
             
@@ -96,16 +107,16 @@ async def sc_network_tb(dut):
             # else:
             #     output += dut.dout.value
             output += np.array((list(str(dut.dout.value)))).astype(int)
-            try:
-                output += np.array((list(str(dut.dout.value)))).astype(int)
-            except:
-                n -= 1
+            # try:
+            #     output += np.array((list(str(dut.dout.value)))).astype(int)
+            # except:
+            #     n -= 1
 
         pc = output / n
 
 
-        print(f"Test {6}:")
-        print(f"Expected Prob: {test_labels[6]} \t Prob Output: {pc}")
+        print(f"Test {i}:")
+        print(f"Label: {test_labels[a+i]} \t Expected Prob: {model.predict(test_images1[a+i:a+i+1])} \t Prob Output: {pc}")
 
 
 
