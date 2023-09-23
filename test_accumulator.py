@@ -23,26 +23,18 @@ async def sc_accumulator(dut):
 
     
     for i in range(10): # 10 experiments
-        N = 1
-        output = 0
+        N = 4
+        
         for _ in range(N):
-            # Generate random input streams with probabilities -0.4 and 0.6
-            # dut.a.value = 1 if random.uniform(0, 1) < pa else 0
-            # dut.b.value = 1 if random.uniform(0, 1) < pb else 0
-            # dut.select.value = random.randint(0, 1)  # Set select to 0.5
-            
+            # dut.count.value = 0
+            print("datain", dut.data_in.value)
+            dut.data_in.value = _ + 24
             await RisingEdge(dut.clk)
+            print("count", dut.count.value)
             
-            
-            # Calculate expected output based on select
-            output += dut.count.value
-           
-            
-        pc = output / N
-        # c = 2 * pc - 1
-        # assert output == (a + b)/2.0, f"Failed on the {i}th experiment. Got {output}, expected {(a + b)/2.0}"
+
         print(f"Test {i}:")
-        print(f" Prob Output: {pc}")
+
 
 
 

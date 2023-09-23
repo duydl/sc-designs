@@ -12,7 +12,7 @@ import numpy as np
 @cocotb.test()
 async def sc_apc_neuron(dut):
 
-    x_range = np.linspace(0,1,41)
+    x_range = np.linspace(0,1,81)
     # Set initial input value to prevent it from floating
     dut.din.value = 4
     dut.weight.value = 255
@@ -25,13 +25,15 @@ async def sc_apc_neuron(dut):
 
     y_range = []
     for x in x_range: 
-        x = 0.8
-        N = 1024
+        # x = 0.8
+        N = 256
         y = 0
         dut.reset.value = 1
         await RisingEdge(dut.clk)
         dut.reset.value = 0
         for _ in range(N):
+            print(_)
+            print("mem", dut.mem1.value)
             
             dut.din.value = 1*int(random.uniform(0, 1) < x) + 2*int(random.uniform(0, 1) < x) + 4*int(random.uniform(0, 1) < x) + 8*int(random.uniform(0, 1) < x) + 16*int(random.uniform(0, 1) < x)  + 32*int(random.uniform(0, 1) < x) + 64*int(random.uniform(0, 1) < x)  + 128*int(random.uniform(0, 1) < x) 
             
@@ -40,12 +42,12 @@ async def sc_apc_neuron(dut):
             # Calculate expected output based on select
             y += dut.dout.value
             # if _ % 100 == 0:
-            print(_)
-            print("current state", dut.current_state.value)
+            
+            
             print("count", dut.count.value)
-            print("mem", dut.mem1.value)
+            print("current state", dut.current_state.value)
             # print("N/2", dut.N.value)
-           
+            
             
         y_range.append(y/N)
     with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out_apc_neuron.txt", "w") as f:

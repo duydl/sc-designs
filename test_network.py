@@ -50,21 +50,22 @@ async def sc_network_tb(dut):
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
     
-    dut.reset.value = 1
-    await RisingEdge(dut.clk)
-    dut.reset.value = 0
 
    
     for i, test_image in enumerate(test_images[6:7]): # 10 experiments
         
         N = 1024
+        n = N
         output = 0
+        dut.reset.value = 1
+        await RisingEdge(dut.clk)
+        dut.reset.value = 0
 
         for _ in range(N):
             print(_)
 
             dut.din.value = list_to_binary( func(test_image.flatten()))
-
+            print("input__", list_to_binary( func(test_image.flatten())))
             # dut.sel1.value = [random.randint(0,784) for i in range(128)]
             # dut.sel2.value = [random.randint(0,128) for i in range(10)]
             
@@ -78,10 +79,13 @@ async def sc_network_tb(dut):
             # print(len([list_to_binary(x) for x in func(layer_weights[1].T)]), [list_to_binary(x) for x in func(layer_weights[1].T)])
 
             await RisingEdge(dut.clk)
-
+            # await RisingEdge(dut.clk)
             # print(len(dut.weight_1.value) ,dut.weight_1.value)
             # print("input," , dut.din.value)
-            print("output", dut.dout.value)
+            print("input", dut.din.value)
+            print("layer 1", dut.layer1_output.value)
+            print("layer 2", dut.dout.value)
+            
             # print("weight", dut.weight_1.value[6])
             # print("output layer", dut.layer1_output.value)
 
@@ -91,10 +95,13 @@ async def sc_network_tb(dut):
             #     count += 1
             # else:
             #     output += dut.dout.value
-
             output += np.array((list(str(dut.dout.value)))).astype(int)
+            try:
+                output += np.array((list(str(dut.dout.value)))).astype(int)
+            except:
+                n -= 1
 
-        pc = output / N
+        pc = output / n
 
 
         print(f"Test {6}:")

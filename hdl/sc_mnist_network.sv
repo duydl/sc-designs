@@ -24,7 +24,7 @@ module sc_mnist_network
     input wire [N1-1:0] weight_1 [0:N2-1], 
 
 
-    output wire [N2-1:0] dout // Output size
+    output logic [N2-1:0] dout // Output size
   );
 
   wire [N1-1:0] layer1_output; // Output of the first layer
@@ -42,7 +42,7 @@ module sc_mnist_network
     end
   endgenerate
 
-  wire [N2-1:0] layer2_output; // Output of the second layer
+  reg [N2-1:0] layer2_output; // Output of the second layer
   // Instantiate N2 neurons for the second layer
   generate
     genvar j;
@@ -57,13 +57,11 @@ module sc_mnist_network
     end
   endgenerate
 
-  reg mem;
   always @(posedge clk, posedge reset) begin
     if (reset)
-      mem <= 0; // Initial state
+      dout <= 0; // Initial state
     else
-      mem <= layer2_output;      
+      dout <= layer2_output;      
     end
 
-    assign dout = mem;
 endmodule
