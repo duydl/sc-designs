@@ -70,7 +70,6 @@ def test_apc_neuron():
     run(
         verilog_sources=glob.glob('hdl/*'),
         toplevel="sc_apc_neuron",    # top level HDL
-        
         module="test_apc_neuron", # name of the file that contains @cocotb.test() -- this file
         simulator="icarus"
 

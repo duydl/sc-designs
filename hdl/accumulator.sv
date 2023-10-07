@@ -70,9 +70,7 @@ module accumulator
     always @(posedge clk) begin
         count_tem = 0;
         for (int i = 0; i < N; i = i + 1) begin
-
-                count_tem = count_tem + data_in[i];
-
+            count_tem = count_tem + data_in[i];
         end
     end
 

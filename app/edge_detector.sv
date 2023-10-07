@@ -1,3 +1,5 @@
+
+
 module edge_detector (
     input logic clk,
     // input logic reset,

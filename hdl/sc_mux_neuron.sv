@@ -16,7 +16,7 @@ module sc_mux_neuron
   // Search reg vs wire
   always_comb
   begin
-    mem1 = din & weight;
+    mem1 = ~(din ^ weight);;
     mem2 = mem1[sel];
   end
 
