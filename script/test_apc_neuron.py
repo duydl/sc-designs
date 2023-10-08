@@ -35,7 +35,7 @@ async def sc_apc_neuron(dut):
             print(_)
             print("mem", dut.mem1.value)
             
-            dut.din.value = 1*int(random.uniform(0, 1) < x) + 2*int(random.uniform(0, 1) < x) + 4*int(random.uniform(0, 1) < x) + 8*int(random.uniform(0, 1) < x) + 16*int(random.uniform(0, 1) < x)  + 32*int(random.uniform(0, 1) < x) + 64*int(random.uniform(0, 1) < x)  + 128*int(random.uniform(0, 1) < x) 
+            dut.din.value = 1*int(random.random() < x) + 2*int(random.random() < x) + 4*int(random.random() < x) + 8*int(random.random() < x) + 16*int(random.random() < x)  + 32*int(random.random() < x) + 64*int(random.random() < x)  + 128*int(random.random() < x) 
             
             await RisingEdge(dut.clk)
             

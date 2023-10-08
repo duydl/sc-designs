@@ -39,21 +39,15 @@ class MLPModel(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(MLPModel, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, output_size)
-        self.tanh = nn.Tanh() 
-        self.sigmoid = nn.Sigmoid()# Sigmoid activation for binary classification
+        self.sigmoid = nn.Sigmoid()  # Sigmoid activation for binary classification
 
-        self.fc1.bias.data.fill_(0)
-        self.fc1.bias.requires_grad = False
-        self.fc2.bias.data.fill_(0)
-        self.fc2.bias.requires_grad = False
-        
     def forward(self, x):
         out = self.fc1(x)
-        out = self.tanh(out)
-        out = self.fc2(out)
-        # out = (self.tanh(out)+1)/2  # Apply sigmoid to output
         out = self.sigmoid(out)
+        out = self.fc2(out)
+        out = self.sigmoid(out)  # Apply sigmoid to output
         return out
 
 
@@ -129,12 +123,12 @@ async def sc_network_tb(dut):
     fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
     fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
 
-    a, b = 0,3
-    result = []
-    print(test_images_prob)
+    a, b = 0,5
+    
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
-    # for i, test_image in enumerate(test_images_prob):
-        N = 1024
+        
+        N = 256
+        n = N
         output = 0
         
         dut.reset.value = 1
@@ -191,14 +185,12 @@ async def sc_network_tb(dut):
             # except:
             #     n -= 1
 
-        pc = output / N
-        result.append(pc[0])
-    
+        pc = output / n
+
+
         print(f"Test {i}:")
-        print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])[0]} \t Prob Output: {pc}")
-    print(y_test.numpy().astype(int))
-    print((np.array(result) > 0.5).astype(int))
-    print("accuracy", accuracy_score(y_test.numpy().astype(int), (np.array(result) > 0.5).astype(int)))
+        print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])} \t Prob Output: {pc}")
+
 
 
 '''

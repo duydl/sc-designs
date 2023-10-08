@@ -1,15 +1,16 @@
 module sc_apc_neuron
   #(parameter K = 3,
     parameter N = 2**K,
-    parameter S = 2*N
+    parameter S = 8 
+    // increase S to 2*N make all output become zero
    )
   ( input logic clk,
     input logic reset,
     input logic bias,
     input logic [N-1:0] din,
     input logic [N-1:0] weight, 
-    output logic [N-1:0] mem1,
-    output logic [K-1:0] count,
+    output logic [N:0] mem1,
+    output logic [K:0] count,
     output logic [S-1:0] current_state,
     output logic dout              // Output signal
   );
@@ -18,6 +19,7 @@ module sc_apc_neuron
 // assign din & weight;
 always_comb begin
   mem1 = ~(din  ^ weight) ;
+  mem1[N] = bias;
 end
 accumulator #(.K(K)) accumulator_inst (
         .clk(clk),
@@ -41,7 +43,7 @@ always @(negedge clk, negedge reset) begin
         current_state <= (2**S)/2; // Initial state
     else
         current_state <= next_state;
-        // dout = current_state[S-1] ;
+        dout = current_state[S-1] ;
         
 end
 
@@ -51,7 +53,7 @@ always @(current_state, count) begin
       next_state =  0;
     else next_state = current_state + count - N/2;
 
-    dout = current_state[S-1] ; 
+    // dout = (current_state[S-1] == 1'b1); 
 end
 
 
