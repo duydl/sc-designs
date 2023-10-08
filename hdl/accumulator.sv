@@ -61,8 +61,8 @@ module accumulator
 
 )(
     input wire clk,
-    input logic [N-1:0] data_in, // Adjust the width based on your parameter
-    output logic [K:0] count 
+    input logic [N:0] data_in, // Adjust the width based on your parameter
+    output logic [K+1:0] count 
 );
 
     reg [K:0] count_tem = 0;

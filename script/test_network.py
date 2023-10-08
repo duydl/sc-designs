@@ -33,47 +33,52 @@ async def sc_network_tb(dut):
 ])
 
     # Load the saved weights into the new model
-    model.load_weights('/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/mnist_model_weights.h5')
+    model.load_weights('/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/script/mnist_model_weights.h5')
     layer_weights = []
-
+    biases = []
     for layer in model.layers:
         if isinstance(layer, tf.keras.layers.Dense):
             weights = layer.get_weights()
             if weights:
                 layer_weights.append((1 + weights[0])/2)
+                biases.append((1 + weights[1])/2)
+    print(len(biases[0]))
+    print(biases)
+    print(bin(list_to_binary(func(biases[0]))), bin(list_to_binary(func(biases[1]))))
+    (_, _), (test_images, test_labels) = mnist.load_data()
+    test_images = test_images.reshape((10000, 28, 28, 1))
+    test_images = test_images.astype('float32') /255
 
-    (_, _), (test_images1, test_labels) = mnist.load_data()
-    test_images1 = test_images1.reshape((10000, 28, 28, 1))
-    test_images = test_images1.astype('float32') / 255
-
+    test_images_prob = (1 + test_images)/2
     clock = Clock(dut.clk, 10)  
 
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
     
 
-    a, b = 77,78
-    for i, test_image in enumerate(test_images[a:b]): # 10 experiments
+    a, b = 12,13
+    for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
         
-        N = 64
+        N = 1024
         n = N
         output = 0
         
         dut.reset.value = 1
         await RisingEdge(dut.clk)
 
-        dut.din.value = list_to_binary( func( (1+test_image.flatten()) /2 ))
-        # dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
-        # dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
-
-        dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
-        dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
+        dut.din.value = list_to_binary( func( test_image.flatten()))
+        dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
+        dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
+        dut.bias_0.value = list_to_binary(func(biases[0]))
+        dut.bias_1.value = list_to_binary(func(biases[1]))
+        
+        # dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
+        # dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
         
         await RisingEdge(dut.clk)
         dut.reset.value = 0
 
         for _ in range(N):
-            print(_)
 
             dut.din.value = list_to_binary( func( (1+test_image.flatten()) /2 ))
             # print("input__", list_to_binary( func( (1+test_image.flatten()) /2 )))
@@ -81,21 +86,22 @@ async def sc_network_tb(dut):
             # dut.sel2.value = [random.randint(0,128) for i in range(10)]
             
 
-            # dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
-            # dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
-            dut.weight_0.value = [int("1"*len(x), 2) for x in func(layer_weights[0].T)]
-            dut.weight_1.value = [int("1"*len(x), 2) for x in func(layer_weights[1].T)]
-
+            dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
+            dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
+            # dut.weight_0.value = [int("1"*len(x), 2) for x in func(layer_weights[0].T)]
+            # dut.weight_1.value = [int("1"*len(x), 2) for x in func(layer_weights[1].T)]
+            dut.bias_0.value = list_to_binary(func(biases[0]))
+            dut.bias_1.value = list_to_binary(func(biases[1]))
             # await FallingEdge(dut.clk)
             await RisingEdge(dut.clk)
 
-            print("input", dut.din.value)
-            print("weight", dut.weight_0.value[4])
-            print("mem1", dut.mem1.value[0])
-            print("count", dut.count.value)
-            print("states", dut.states.value)
-            print("layer 1", dut.layer1_output.value)
-            print("layer 2", dut.dout.value)
+            # print("input", dut.din.value)
+            # print("weight", dut.weight_0.value[4])
+            # print("mem1", dut.mem1.value[0])
+            # print("count", dut.count.value)
+            # print("states", dut.states.value)
+            # print("layer 1", dut.layer1_output.value)
+            # print("layer 2", dut.dout.value)
             
             # print("weight", dut.weight_1.value[6])
             # print("output layer", dut.layer1_output.value)
@@ -116,7 +122,7 @@ async def sc_network_tb(dut):
 
 
         print(f"Test {i}:")
-        print(f"Label: {test_labels[a+i]} \t Expected Prob: {model.predict(test_images1[a+i:a+i+1])} \t Prob Output: {pc}")
+        print(f"Label: {test_labels[a+i]} \t Expected Prob: {model.predict(test_images[a+i:a+i+1])} \t Prob Output: {pc}")
 
 
 

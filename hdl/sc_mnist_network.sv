@@ -1,16 +1,19 @@
 module sc_mnist_network
   #(
     // Input
-    parameter N0 = 784,
-    
+    // parameter N0 = 784,
+  parameter N0 = 64,
     // First layer
-    parameter K1 = 10, // K1 should be chosen such that 2^K1 >= N0 (input size)
-    parameter N1 = 128,
+    // parameter K1 = 10, // K1 should be chosen such that 2^K1 >= N0 (input size)
+    // parameter N1 = 128,
+    parameter K1 = 6, // K1 should be chosen such that 2^K1 >= N0 (input size)
+    parameter N1 = 32,
 
     // Second layer - Output
-    parameter K2 = 7,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
-    parameter N2 = 10
-    
+    // parameter K2 = 7,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
+    // parameter N2 = 10
+    parameter K2 = 5,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
+    parameter N2 = 1
   )
   (
     input logic clk,
@@ -19,16 +22,16 @@ module sc_mnist_network
     input logic [N0-1:0] din, // Input size
 
     input logic [N0-1:0] weight_0 [0:N1-1],
-
+    input logic [N1-1:0] bias_0  ,
 
     input logic [N1-1:0] weight_1 [0:N2-1], 
-
+    input logic [N2-1:0] bias_1 ,
 
     output logic [N2-1:0] dout // Output size
   );
 
   reg [N1-1:0] layer1_output; // Output of the first layer
-  reg [N0-1:0] mem1 [0:N1-1];
+  reg [N0:0] mem1 [0:N1-1];
   reg [7:0] states [0:N1-1];
   reg [K1:0] count [0:N1-1];
   // Instantiate N1 neurons for the first layer
@@ -40,6 +43,7 @@ module sc_mnist_network
         .reset(reset),
         .din(din),
         .weight(weight_0[i]),
+        .bias(bias_0[i]),
         .count(count[i]),
         .mem1(mem1[i]),
         .current_state(states[i]),
@@ -58,6 +62,7 @@ module sc_mnist_network
         .reset(reset),
         .din(layer1_output),
         .weight(weight_1[j]),
+        .bias(bias_1[j]),
         .dout(layer2_output[j])
       );
     end

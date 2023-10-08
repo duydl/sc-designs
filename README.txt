@@ -1,4 +1,4 @@
-python -m pytest -rP script/test.py
+python -m pytest -rP -s script/test.py
 
 3 changes
 - test file name and test module name 
