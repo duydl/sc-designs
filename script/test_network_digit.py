@@ -102,7 +102,9 @@ print(f'Accuracy: {accuracy:.2f}')
 def list_to_binary(arr):
     return int(''.join(['1' if x > 0.5 else '0' for x in arr]), 2)
 
-
+model_state_dict = model.state_dict()
+print((model_state_dict['fc1.weight'].clone() + 1) / 2)
+print((model_state_dict['fc2.weight'].clone() + 1) / 2)
 '''
 1. Testbench
 '''
@@ -114,8 +116,6 @@ async def sc_network_tb(dut):
     func = lambda x: int(random.random() < x)
     
  
-    
-    model_state_dict = model.state_dict()
 
     test_images_prob = (1 + X_test)/2
     clock = Clock(dut.clk, 10)  
@@ -127,7 +127,7 @@ async def sc_network_tb(dut):
     fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
     fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
 
-    a, b = 0,20
+    a, b = 0,30
     result = []
     print(test_images_prob)
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
@@ -196,7 +196,9 @@ async def sc_network_tb(dut):
         print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])[0]} \t Prob Output: {pc}")
     print(y_test[a:b].numpy().astype(int))
     print((np.array(result) > 0.5).astype(int))
-    print("accuracy", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result) > 0.5).astype(int)))
+    print(np.array([y[0] for y in (model(X_test[a:b]) > 0.5)]).astype(int))
+    print("accuracy1", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result) > 0.5).astype(int)))
+    print("accuracy2", accuracy_score(y_test[a:b].numpy().astype(int), np.array([y[0] for y in (model(X_test[a:b]) > 0.5)])))
 
 
 '''
