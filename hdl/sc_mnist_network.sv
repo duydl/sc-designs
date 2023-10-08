@@ -22,10 +22,10 @@ module sc_mnist_network
     input logic [N0-1:0] din, // Input size
 
     input logic [N0-1:0] weight_0 [0:N1-1],
-    input logic [N1-1:0] bias_0  ,
+    // input logic [N1-1:0] bias_0  ,
 
     input logic [N1-1:0] weight_1 [0:N2-1], 
-    input logic [N2-1:0] bias_1 ,
+    // input logic [N2-1:0] bias_1 ,
 
     output logic [N2-1:0] dout // Output size
   );
@@ -43,7 +43,7 @@ module sc_mnist_network
         .reset(reset),
         .din(din),
         .weight(weight_0[i]),
-        .bias(bias_0[i]),
+        // .bias(bias_0[i]),
         .count(count[i]),
         .mem1(mem1[i]),
         .current_state(states[i]),
@@ -62,7 +62,7 @@ module sc_mnist_network
         .reset(reset),
         .din(layer1_output),
         .weight(weight_1[j]),
-        .bias(bias_1[j]),
+        // .bias(bias_1[j]),
         .dout(layer2_output[j])
       );
     end

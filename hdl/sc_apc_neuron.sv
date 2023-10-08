@@ -6,11 +6,11 @@ module sc_apc_neuron
    )
   ( input logic clk,
     input logic reset,
-    input logic bias,
+    // input logic bias,
     input logic [N-1:0] din,
     input logic [N-1:0] weight, 
-    output logic [N:0] mem1,
-    output logic [K:0] count,
+    output logic [N-1:0] mem1,
+    output logic [K-1:0] count,
     output logic [S-1:0] current_state,
     output logic dout              // Output signal
   );
@@ -19,7 +19,7 @@ module sc_apc_neuron
 // assign din & weight;
 always_comb begin
   mem1 = ~(din  ^ weight) ;
-  mem1[N] = bias;
+
 end
 accumulator #(.K(K)) accumulator_inst (
         .clk(clk),

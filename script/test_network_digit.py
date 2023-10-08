@@ -39,15 +39,19 @@ class MLPModel(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(MLPModel, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, output_size)
-        self.sigmoid = nn.Sigmoid()  # Sigmoid activation for binary classification
+        self.tanh = nn.Tanh() 
+        self.sigmoid = nn.Sigmoid()# Sigmoid activation for binary classification
 
+        self.fc1.bias.data.fill_(0)
+        self.fc2.bias.requires_grad = False
+        
     def forward(self, x):
         out = self.fc1(x)
-        out = self.sigmoid(out)
+        out = self.tanh(out)
         out = self.fc2(out)
-        out = self.sigmoid(out)  # Apply sigmoid to output
+        out = (self.tanh(out)+1)/2  # Apply sigmoid to output
+        # out = self.sigmoid(out)
         return out
 
 
@@ -118,25 +122,25 @@ async def sc_network_tb(dut):
 
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
-    fc1_bias = (model_state_dict['fc1.bias'].clone()+ 1) / 2
-    fc2_bias = (model_state_dict['fc2.bias'].clone()+ 1) / 2
+    # fc1_bias = (model_state_dict['fc1.bias'].clone()+ 1) / 2
+    # fc2_bias = (model_state_dict['fc2.bias'].clone()+ 1) / 2
     fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
     fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
 
-    a, b = 0,5
-    
+    a, b = 0,20
+    result = []
+    print(test_images_prob)
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
-        
-        N = 256
-        n = N
+    # for i, test_image in enumerate(test_images_prob):
+        N = 1024
         output = 0
         
         dut.reset.value = 1
         await RisingEdge(dut.clk)
 
         dut.din.value = list_to_binary( test_image.apply_(func))
-        dut.bias_0.value = list_to_binary(fc1_bias.apply_(func))
-        dut.bias_1.value = list_to_binary(fc2_bias.apply_(func))
+        # dut.bias_0.value = list_to_binary(fc1_bias.apply_(func))
+        # dut.bias_1.value = list_to_binary(fc2_bias.apply_(func))
         dut.weight_0.value = [list_to_binary(x) for x in fc1_weight.apply_(func)]
         dut.weight_1.value = [list_to_binary(x) for x in fc2_weight.apply_(func)]
 
@@ -148,14 +152,14 @@ async def sc_network_tb(dut):
 
         for _ in range(N):
             
-            fc1_bias = (model_state_dict['fc1.bias'].clone()+ 1) / 2
-            fc2_bias = (model_state_dict['fc2.bias'].clone()+ 1) / 2
+            # fc1_bias = (model_state_dict['fc1.bias'].clone()+ 1) / 2
+            # fc2_bias = (model_state_dict['fc2.bias'].clone()+ 1) / 2
             fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
             fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
             
             dut.din.value = list_to_binary( test_image.apply_(func))
-            dut.bias_0.value = list_to_binary(fc1_bias.apply_(func))
-            dut.bias_1.value = list_to_binary(fc2_bias.apply_(func))
+            # dut.bias_0.value = list_to_binary(fc1_bias.apply_(func))
+            # dut.bias_1.value = list_to_binary(fc2_bias.apply_(func))
             dut.weight_0.value = [list_to_binary(x) for x in fc1_weight.apply_(func)]
             dut.weight_1.value = [list_to_binary(x) for x in fc2_weight.apply_(func)]
 
@@ -185,12 +189,14 @@ async def sc_network_tb(dut):
             # except:
             #     n -= 1
 
-        pc = output / n
-
-
+        pc = output / N
+        result.append(pc[0])
+    
         print(f"Test {i}:")
-        print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])} \t Prob Output: {pc}")
-
+        print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])[0]} \t Prob Output: {pc}")
+    print(y_test[a:b].numpy().astype(int))
+    print((np.array(result) > 0.5).astype(int))
+    print("accuracy", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result) > 0.5).astype(int)))
 
 
 '''
