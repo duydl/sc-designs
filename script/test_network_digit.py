@@ -50,7 +50,7 @@ class MLPModel(nn.Module):
         out = self.fc1(x)
         out = self.tanh(out)
         out = self.fc2(out)
-        out = self.sigmoid(out)  # Apply sigmoid to output
+        out = (self.tanh(out)+1)/2  # Apply sigmoid to output
         # out = self.sigmoid(out)
         return out
 
@@ -99,12 +99,16 @@ accuracy = accuracy_score(y_test.numpy(), y_pred.numpy())
 print(f'Accuracy: {accuracy:.2f}')
 
 
-def list_to_binary(arr):
-    return int(''.join(['1' if x > 0.5 else '0' for x in arr]), 2)
-
 model_state_dict = model.state_dict()
 print((model_state_dict['fc1.weight'].clone() + 1) / 2)
 print((model_state_dict['fc2.weight'].clone() + 1) / 2)
+
+# fc1_bias = (model_state_dict['fc1.bias'].numpy()+ 1) / 2
+# fc2_bias = (model_state_dict['fc2.bias'].numpy()+ 1) / 2
+fc1_weight = (model_state_dict['fc1.weight'].numpy() + 1) / 2
+fc2_weight = (model_state_dict['fc2.weight'].numpy() + 1) / 2
+test_images_prob = (1 + X_test.numpy())/2
+
 '''
 1. Testbench
 '''
@@ -112,37 +116,37 @@ print((model_state_dict['fc2.weight'].clone() + 1) / 2)
 @cocotb.test()
 async def sc_network_tb(dut):
  
-    
-    func = lambda x: int(random.random() < x)
-    
- 
 
-    test_images_prob = (1 + X_test)/2
+    
     clock = Clock(dut.clk, 10)  
 
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
-    # fc1_bias = (model_state_dict['fc1.bias'].clone()+ 1) / 2
-    # fc2_bias = (model_state_dict['fc2.bias'].clone()+ 1) / 2
-    fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
-    fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
+
 
     a, b = 0,-1
     result = []
-    print(test_images_prob)
+    
+    
+    
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
     # for i, test_image in enumerate(test_images_prob):
         N = 1024
         output = 0
-        
         dut.reset.value = 1
         await RisingEdge(dut.clk)
+        
+        random_array_din = np.random.random(test_image.shape)
+        random_array0 = np.random.random(fc1_weight.shape)
+        random_array1 = np.random.random(fc2_weight.shape)
 
-        dut.din.value = list_to_binary( test_image.apply_(func))
-        # dut.bias_0.value = list_to_binary(fc1_bias.apply_(func))
-        # dut.bias_1.value = list_to_binary(fc2_bias.apply_(func))
-        dut.weight_0.value = [list_to_binary(x) for x in fc1_weight.apply_(func)]
-        dut.weight_1.value = [list_to_binary(x) for x in fc2_weight.apply_(func)]
+        binary_array_din = (random_array_din < test_image).astype(int)[::-1]
+        binary_array0 = (random_array0 < fc1_weight).astype(int)[:,::-1]
+        binary_array1 = (random_array1 < fc2_weight).astype(int)[:,::-1]
+        
+        dut.din.value = int(np.sum(binary_array_din * 2**np.arange(binary_array_din.shape[0]), axis=0))
+        dut.weight_0.value = np.sum(binary_array0 * 2**np.arange(binary_array0.shape[1]), axis=1).tolist()
+        dut.weight_1.value = np.sum(binary_array1 * 2**np.arange(binary_array1.shape[1]), axis=1).tolist()
 
         # dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
         # dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
@@ -152,16 +156,18 @@ async def sc_network_tb(dut):
 
         for _ in range(N):
             
-            # fc1_bias = (model_state_dict['fc1.bias'].clone()+ 1) / 2
-            # fc2_bias = (model_state_dict['fc2.bias'].clone()+ 1) / 2
-            fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
-            fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
+            random_array_din = np.random.random(test_image.shape)
+            random_array0 = np.random.random(fc1_weight.shape)
+            random_array1 = np.random.random(fc2_weight.shape)
+
+            binary_array_din = (random_array_din < test_image).astype(int)
+            binary_array0 = (random_array0 < fc1_weight).astype(int)
+            binary_array1 = (random_array1 < fc2_weight).astype(int)
             
-            dut.din.value = list_to_binary( test_image.apply_(func))
-            # dut.bias_0.value = list_to_binary(fc1_bias.apply_(func))
-            # dut.bias_1.value = list_to_binary(fc2_bias.apply_(func))
-            dut.weight_0.value = [list_to_binary(x) for x in fc1_weight.apply_(func)]
-            dut.weight_1.value = [list_to_binary(x) for x in fc2_weight.apply_(func)]
+           
+            dut.din.value = int(np.sum(binary_array_din * 2**np.arange(binary_array_din.shape[0]), axis=0))
+            dut.weight_0.value = np.sum(binary_array0 * 2**np.arange(binary_array0.shape[1]), axis=1).tolist()
+            dut.weight_1.value = np.sum(binary_array1 * 2**np.arange(binary_array1.shape[1]), axis=1).tolist()
 
             # await FallingEdge(dut.clk)
             await RisingEdge(dut.clk)

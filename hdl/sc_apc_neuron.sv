@@ -1,7 +1,7 @@
 module sc_apc_neuron
   #(parameter K = 3,
     parameter N = 2**K,
-    parameter S = 8 
+    parameter S = K + 2
     // increase S to 2*N make all output become zero
    )
   ( input logic clk,
