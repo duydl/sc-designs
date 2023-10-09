@@ -50,7 +50,7 @@ class MLPModel(nn.Module):
         out = self.fc1(x)
         out = self.tanh(out)
         out = self.fc2(out)
-        out = (self.tanh(out)+1)/2  # Apply sigmoid to output
+        out = self.sigmoid(out)  # Apply sigmoid to output
         # out = self.sigmoid(out)
         return out
 
@@ -127,7 +127,7 @@ async def sc_network_tb(dut):
     fc1_weight = (model_state_dict['fc1.weight'].clone() + 1) / 2
     fc2_weight = (model_state_dict['fc2.weight'].clone() + 1) / 2
 
-    a, b = 0,30
+    a, b = 0,-1
     result = []
     print(test_images_prob)
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
@@ -199,6 +199,7 @@ async def sc_network_tb(dut):
     print(np.array([y[0] for y in (model(X_test[a:b]) > 0.5)]).astype(int))
     print("accuracy1", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result) > 0.5).astype(int)))
     print("accuracy2", accuracy_score(y_test[a:b].numpy().astype(int), np.array([y[0] for y in (model(X_test[a:b]) > 0.5)])))
+    print("sample", len(y_test[a:b]))
 
 
 '''
