@@ -1,19 +1,14 @@
-module sc_mnist_network
+module sc_mnist_network_digit
   #(
     // Input
-    parameter N0 = 784,
-  // parameter N0 = 64,
+  parameter N0 = 64,
     // First layer
-    parameter K1 = 10, // K1 should be chosen such that 2^K1 >= N0 (input size)
-    parameter N1 = 128,
-    // parameter K1 = 6, // K1 should be chosen such that 2^K1 >= N0 (input size)
-    // parameter N1 = 32,
+    parameter K1 = 6, // K1 should be chosen such that 2^K1 >= N0 (input size)
+    parameter N1 = 32,
 
     // Second layer - Output
-    parameter K2 = 7,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
+    parameter K2 = 5,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
     parameter N2 = 1
-    // parameter K2 = 5,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
-    // parameter N2 = 1
   )
   (
     input logic clk,

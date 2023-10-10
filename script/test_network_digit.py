@@ -18,13 +18,14 @@ import numpy as np
 digits = datasets.load_digits()
 
 # Choose two classes (e.g., classes 0 and 1) for binary classification
-class_0 = 0
-class_1 = 1
+class_0 = 2
+class_1 = 3
 
 # Filter the dataset to only include the chosen classes
 mask = (digits.target == class_0) | (digits.target == class_1)
 data = digits.data[mask]
 labels = digits.target[mask]
+labels = [0 if label == class_0 else 1 for label in labels]
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
@@ -50,7 +51,7 @@ class MLPModel(nn.Module):
         out = self.fc1(x)
         out = self.tanh(out)
         out = self.fc2(out)
-        out = (self.tanh(out)+1)/2  # Apply sigmoid to output
+        out = self.sigmoid(out)  # Apply sigmoid to output
         # out = self.sigmoid(out)
         return out
 
@@ -221,7 +222,7 @@ def test_network():
 
     run(
         verilog_sources=glob.glob('hdl/*'),
-        toplevel="sc_mnist_network",    # top level HDL
+        toplevel="sc_mnist_network_digit",    # top level HDL
         
         module="test_network_digit", # name of the file that contains @cocotb.test() -- this file
         simulator="icarus"

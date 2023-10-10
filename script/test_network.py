@@ -3,16 +3,134 @@ from cocotb.clock import Clock
 from cocotb.triggers import Timer, RisingEdge, FallingEdge, ClockCycles
 
 
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten
-from tensorflow.keras.datasets import mnist
 import random
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import MinMaxScaler  # For input normalization
+from sklearn import datasets
+
 import numpy as np
+# Load the Digits dataset
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchvision
+import torchvision.transforms as transforms
 
 
-def list_to_binary(arr):
-    return int(''.join(map(str, arr)), 2)
+# Define a simple feedforward neural network with one hidden layer and tanh activation
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.fc1 = nn.Linear(28 * 28, 128)  # One hidden layer with 64 units
+        self.fc2 = nn.Linear(128, 1)  # Output layer with 2 classes
+        self.tanh = nn.Tanh() 
+        self.sigmoid = nn.Sigmoid()# Sigmoid activation for binary classification
+        
+        self.fc1.bias.data.fill_(0)
+        self.fc2.bias.requires_grad = False
+        
+    def forward(self, x):
+        x = x.view(-1, 28 * 28)  # Flatten the input
+        x = self.tanh(self.fc1(x))  # Apply tanh activation
+        x = self.fc2(x)
+        x = (self.tanh(x)+1)/2
+        return x
+
+# Define data transformations and load the MNIST test dataset
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+trainset = torchvision.datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+
+# Define a function to filter the test dataset to include only two classes (e.g., 3 and 7)
+def filter_dataset(dataset, class1, class2):
+    filtered_data = []
+    for data, label in dataset:
+        if label == class1 or label == class2:
+            filtered_data.append((data, label))
+    return filtered_data
+
+# Filter the test dataset to include only classes 3 and 7
+class1 = 0
+class2 = 1
+
+
+model = Net()
+criterion = nn.BCELoss() 
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+
+filtered_trainset = filter_dataset(trainset, class1, class2)
+
+# Create a DataLoader for the filtered dataset
+trainloader = torch.utils.data.DataLoader(filtered_trainset, batch_size=64, shuffle=True)
+# Training loop
+for epoch in range(10):  # You can adjust the number of epochs
+    running_loss = 0.0
+    for i, data in enumerate(trainloader, 0):
+        inputs, labels = data
+        labels = labels.float()
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels.view(-1, 1))
+        loss.backward()
+        optimizer.step()
+        running_loss += loss.item()
+
+    print(f"Epoch {epoch+1}, Loss: {running_loss / len(trainloader)}")
+
+print("Binary training with one hidden layer and tanh activation finished")
+
+filtered_testset = filter_dataset(testset, class1, class2)
+
+# Create a DataLoader for the filtered test dataset
+testloader = torch.utils.data.DataLoader(filtered_testset, batch_size=64, shuffle=False)
+# Evaluation loop
+correct = 0
+total = 0
+with torch.no_grad():
+    for data in testloader:
+        images, labels = data
+        
+        outputs = model(images)
+        predicted = (outputs >= 0.5).float()  # Apply threshold of 0.5
+        # predicted = torch.cat(predicted, dim=0)
+        # print(labels.view(-1, 1))
+        # print(predicted)
+        # print("labels.size(0)", labels.size(0))
+        # print("(predicted == labels).sum().item()", (predicted == labels).sum().item())
+        total += labels.size(0)
+        correct += (predicted == labels.view(-1, 1)).sum().item()
+
+accuracy = 100 * correct / total
+print(f'Accuracy on the test dataset: {accuracy:.2f}%')
+
+
+
+image_data = []
+labels = []
+for data in testloader:
+    images, batch_labels = data
+    image_data.append(images)  # Convert tensor to numpy array
+    labels.append(batch_labels.numpy())  # Convert tensor to numpy array
+
+# Concatenate the lists of arrays to get a single array for image data and labels
+image_data = torch.cat(image_data, dim=0)
+X_test = np.concatenate(image_data.numpy())
+y_test = np.concatenate(labels)
+
+model_state_dict = model.state_dict()
+# print((model_state_dict['fc1.weight'].clone() + 1) / 2)
+# print((model_state_dict['fc2.weight'].clone() + 1) / 2)
+
+# fc1_bias = (model_state_dict['fc1.bias'].numpy()+ 1) / 2
+# fc2_bias = (model_state_dict['fc2.bias'].numpy()+ 1) / 2
+fc1_weight = (model_state_dict['fc1.weight'].numpy() + 1) / 2
+fc2_weight = (model_state_dict['fc2.weight'].numpy() + 1) / 2
+test_images_prob = (1 + X_test)/2
 
 
 '''
@@ -21,57 +139,39 @@ def list_to_binary(arr):
 
 @cocotb.test()
 async def sc_network_tb(dut):
+ 
 
-    func = np.vectorize(lambda x: int(random.random() < x))
-    # func = np.vectorize(lambda x: 0 if x < 0.5 else 1)
-
-    # Create a model with the same architecture as the original model
-    model = Sequential([
-    Flatten(input_shape=(28, 28, 1)),
-    Dense(128, activation='relu'),
-    Dense(10, activation='softmax')
-])
-
-    # Load the saved weights into the new model
-    model.load_weights('/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/script/mnist_model_weights.h5')
-    layer_weights = []
-    biases = []
-    for layer in model.layers:
-        if isinstance(layer, tf.keras.layers.Dense):
-            weights = layer.get_weights()
-            if weights:
-                layer_weights.append((1 + weights[0])/2)
-                biases.append((1 + weights[1])/2)
-    print(len(biases[0]))
-    print(biases)
-    print(bin(list_to_binary(func(biases[0]))), bin(list_to_binary(func(biases[1]))))
-    (_, _), (test_images, test_labels) = mnist.load_data()
-    test_images = test_images.reshape((10000, 28, 28, 1))
-    test_images = test_images.astype('float32') /255
-
-    test_images_prob = (1 + test_images)/2
+    
     clock = Clock(dut.clk, 10)  
 
     # Start the clock. Start it low to avoid issues on the first RisingEdge
     cocotb.start_soon(clock.start(start_high=False))
-    
 
-    a, b = 12,13
-    for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
-        
+
+    a, b = 0,20
+    result = []
+    
+    
+    
+    for i, test_image in enumerate(test_images_prob[a:b]):
         N = 1024
-        n = N
         output = 0
-        
         dut.reset.value = 1
         await RisingEdge(dut.clk)
+        dut._log.info("Running test!")
+        test_image = test_image.reshape(28*28)
+        random_array_din = np.random.random(test_image.shape)
+        random_array0 = np.random.random(fc1_weight.shape)
+        random_array1 = np.random.random(fc2_weight.shape)
 
-        dut.din.value = list_to_binary( func( test_image.flatten()))
-        dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
-        dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
-        dut.bias_0.value = list_to_binary(func(biases[0]))
-        dut.bias_1.value = list_to_binary(func(biases[1]))
+        binary_array_din = (random_array_din < test_image).astype(int)[::-1]
+        binary_array0 = (random_array0 < fc1_weight).astype(int)[:,::-1]
+        binary_array1 = (random_array1 < fc2_weight).astype(int)[:,::-1]
         
+        dut.din.value = int(np.sum(binary_array_din * 2**np.arange(binary_array_din.shape[0]), axis=0))
+        dut.weight_0.value = np.sum(binary_array0 * 2**np.arange(binary_array0.shape[1]), axis=1).tolist()
+        dut.weight_1.value = np.sum(binary_array1 * 2**np.arange(binary_array1.shape[1]), axis=1).tolist()
+        dut._log.info("Running test!")
         # dut.weight_0.value = [1 for x in func(layer_weights[0].T)]
         # dut.weight_1.value = [1 for x in func(layer_weights[1].T)]
         
@@ -79,19 +179,20 @@ async def sc_network_tb(dut):
         dut.reset.value = 0
 
         for _ in range(N):
-
-            dut.din.value = list_to_binary( func( (1+test_image.flatten()) /2 ))
-            # print("input__", list_to_binary( func( (1+test_image.flatten()) /2 )))
-            # dut.sel1.value = [random.randint(0,784) for i in range(128)]
-            # dut.sel2.value = [random.randint(0,128) for i in range(10)]
             
+            random_array_din = np.random.random(test_image.shape)
+            random_array0 = np.random.random(fc1_weight.shape)
+            random_array1 = np.random.random(fc2_weight.shape)
 
-            dut.weight_0.value = [list_to_binary(x) for x in func(layer_weights[0].T)]
-            dut.weight_1.value = [list_to_binary(x) for x in func(layer_weights[1].T)]
-            # dut.weight_0.value = [int("1"*len(x), 2) for x in func(layer_weights[0].T)]
-            # dut.weight_1.value = [int("1"*len(x), 2) for x in func(layer_weights[1].T)]
-            dut.bias_0.value = list_to_binary(func(biases[0]))
-            dut.bias_1.value = list_to_binary(func(biases[1]))
+            binary_array_din = (random_array_din < test_image).astype(int)
+            binary_array0 = (random_array0 < fc1_weight).astype(int)
+            binary_array1 = (random_array1 < fc2_weight).astype(int)
+            
+           
+            dut.din.value = int(np.sum(binary_array_din * 2**np.arange(binary_array_din.shape[0]), axis=0))
+            dut.weight_0.value = np.sum(binary_array0 * 2**np.arange(binary_array0.shape[1]), axis=1).tolist()
+            dut.weight_1.value = np.sum(binary_array1 * 2**np.arange(binary_array1.shape[1]), axis=1).tolist()
+
             # await FallingEdge(dut.clk)
             await RisingEdge(dut.clk)
 
@@ -118,12 +219,18 @@ async def sc_network_tb(dut):
             # except:
             #     n -= 1
 
-        pc = output / n
-
-
+        pc = output / N
+        result.append(pc[0])
+    
         print(f"Test {i}:")
-        print(f"Label: {test_labels[a+i]} \t Expected Prob: {model.predict(test_images[a+i:a+i+1])} \t Prob Output: {pc}")
+        print(f"Label: {y_test[a+i]} \t Expected Prob: {model(image_data[a+i:a+i+1])[0]} \t Prob Output: {pc}")
 
+    print(y_test[a:b].numpy().astype(int))
+    print((np.array(result) > 0.5).astype(int))
+    print(np.array([y[0] for y in (model(image_data[a:b]) > 0.5)]).astype(int))
+    print("accuracy1", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result) > 0.5).astype(int)))
+    print("accuracy2", accuracy_score(y_test[a:b].numpy().astype(int), np.array([y[0] for y in (model(image_data[a:b]) > 0.5)])))
+    print("sample", len(y_test[a:b]))
 
 
 '''
