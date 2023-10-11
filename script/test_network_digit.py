@@ -17,15 +17,18 @@ import numpy as np
 # Load the Digits dataset
 digits = datasets.load_digits()
 
-# Choose two classes (e.g., classes 0 and 1) for binary classification
-class_0 = 2
-class_1 = 3
+# # Choose two classes (e.g., classes 0 and 1) for binary classification
+# class_0 = 2
+# class_1 = 3
 
-# Filter the dataset to only include the chosen classes
-mask = (digits.target == class_0) | (digits.target == class_1)
-data = digits.data[mask]
-labels = digits.target[mask]
-labels = [0 if label == class_0 else 1 for label in labels]
+# # Filter the dataset to only include the chosen classes
+# mask = (digits.target == class_0) | (digits.target == class_1)
+# data = digits.data[mask]
+# labels = digits.target[mask]
+# labels = [0 if label == class_0 else 1 for label in labels]
+
+data = digits.data
+labels = digits.target
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=42)
@@ -51,26 +54,28 @@ class MLPModel(nn.Module):
         out = self.fc1(x)
         out = self.tanh(out)
         out = self.fc2(out)
-        out = self.sigmoid(out)  # Apply sigmoid to output
-        # out = self.sigmoid(out)
+        out = (1+self.tanh(out))/2
         return out
 
 
 # Convert data to PyTorch tensors
 X_train = torch.FloatTensor(X_train)
-y_train = torch.FloatTensor(y_train)
 X_test = torch.FloatTensor(X_test)
-y_test = torch.FloatTensor(y_test)
+# y_train = torch.FloatTensor(y_train)
+# y_test = torch.FloatTensor(y_test)
+
+y_train = torch.LongTensor(y_train)
+y_test = torch.LongTensor(y_test)
 
 # Hyperparameters
 input_size = X_train.shape[1]
 hidden_size = 32
-output_size = 1  # Binary classification
+output_size = 10  # Binary classification
 
 # Initialize the model
 model = MLPModel(input_size, hidden_size, output_size)
 # Define loss function and optimizer
-criterion = nn.BCELoss()  # Binary Cross-Entropy Loss
+criterion = nn.CrossEntropyLoss() # Binary Cross-Entropy Loss
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Training loop
@@ -78,7 +83,7 @@ num_epochs = 1000
 for epoch in range(num_epochs):
     # Forward pass
     outputs = model(X_train)
-    loss = criterion(outputs, y_train.view(-1, 1))
+    loss = criterion(outputs, y_train)  # Use CrossEntropyLoss for multi-class classification
 
     # Backward pass and optimization
     optimizer.zero_grad()
@@ -92,11 +97,11 @@ for epoch in range(num_epochs):
 model.eval()
 with torch.no_grad():
     y_pred = model(X_test)
-    y_pred = (y_pred >= 0.5).view(-1)  # Convert probabilities to binary predictions
+    _, predicted = torch.max(y_pred, 1)  # Find the class with the highest probability
 
 print(model(X_test[0:5]))
 
-accuracy = accuracy_score(y_test.numpy(), y_pred.numpy())
+accuracy = accuracy_score(y_test.numpy(), predicted.numpy())
 print(f'Accuracy: {accuracy:.2f}')
 
 
@@ -127,8 +132,6 @@ async def sc_network_tb(dut):
 
     a, b = 0,-1
     result = []
-    
-    
     
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
     # for i, test_image in enumerate(test_images_prob):
@@ -197,15 +200,15 @@ async def sc_network_tb(dut):
             #     n -= 1
 
         pc = output / N
-        result.append(pc[0])
+        result.append(np.argmax(pc))
     
         print(f"Test {i}:")
         print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])[0]} \t Prob Output: {pc}")
     print(y_test[a:b].numpy().astype(int))
-    print((np.array(result) > 0.5).astype(int))
-    print(np.array([y[0] for y in (model(X_test[a:b]) > 0.5)]).astype(int))
-    print("accuracy1", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result) > 0.5).astype(int)))
-    print("accuracy2", accuracy_score(y_test[a:b].numpy().astype(int), np.array([y[0] for y in (model(X_test[a:b]) > 0.5)])))
+    print((np.array(result)))
+    print(np.array([np.argmax(y) for y in (model(X_test[a:b]).detach())]))
+    print("accuracy1", accuracy_score(y_test[a:b].numpy().astype(int), (np.array(result)).astype(int)))
+    print("accuracy2", accuracy_score(y_test[a:b].numpy().astype(int), np.array([np.argmax(y) for y in (model(X_test[a:b]).detach())]) ))
     print("sample", len(y_test[a:b]))
 
 

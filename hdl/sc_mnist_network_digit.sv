@@ -8,7 +8,7 @@ module sc_mnist_network_digit
 
     // Second layer - Output
     parameter K2 = 5,  // K2 should be chosen such that 2^K2 >= N1 (output of the first layer)
-    parameter N2 = 1
+    parameter N2 = 10
   )
   (
     input logic clk,
