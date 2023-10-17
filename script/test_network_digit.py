@@ -97,12 +97,12 @@ with torch.no_grad():
 print(model(X_test[0:5]))
 
 accuracy = accuracy_score(y_test.numpy(), y_pred.numpy())
-print(f'Accuracy: {accuracy:.2f}')
+# print(f'Accuracy: {accuracy:.2f}')
 
 
 model_state_dict = model.state_dict()
-print((model_state_dict['fc1.weight'].clone() + 1) / 2)
-print((model_state_dict['fc2.weight'].clone() + 1) / 2)
+# print((model_state_dict['fc1.weight'].clone() + 1) / 2)
+# print((model_state_dict['fc2.weight'].clone() + 1) / 2)
 
 # fc1_bias = (model_state_dict['fc1.bias'].numpy()+ 1) / 2
 # fc2_bias = (model_state_dict['fc2.bias'].numpy()+ 1) / 2
@@ -132,7 +132,7 @@ async def sc_network_tb(dut):
     
     for i, test_image in enumerate(test_images_prob[a:b]): # 10 experiments
     # for i, test_image in enumerate(test_images_prob):
-        N = 1024
+        N =  1024
         output = 0
         dut.reset.value = 1
         await RisingEdge(dut.clk)
@@ -144,6 +144,10 @@ async def sc_network_tb(dut):
         binary_array_din = (random_array_din < test_image).astype(int)[::-1]
         binary_array0 = (random_array0 < fc1_weight).astype(int)[:,::-1]
         binary_array1 = (random_array1 < fc2_weight).astype(int)[:,::-1]
+        
+        # binary_array_din = (0 < test_image).astype(int)[::-1]
+        # binary_array0 = (0 < fc1_weight).astype(int)[:,::-1]
+        # binary_array1 = (0 < fc2_weight).astype(int)[:,::-1]
         
         dut.din.value = int(np.sum(binary_array_din * 2**np.arange(binary_array_din.shape[0]), axis=0))
         dut.weight_0.value = np.sum(binary_array0 * 2**np.arange(binary_array0.shape[1]), axis=1).tolist()
@@ -165,6 +169,9 @@ async def sc_network_tb(dut):
             binary_array0 = (random_array0 < fc1_weight).astype(int)
             binary_array1 = (random_array1 < fc2_weight).astype(int)
             
+            # binary_array_din = (0 < test_image).astype(int)[::-1]
+            # binary_array0 = (0 < fc1_weight).astype(int)[:,::-1]
+            # binary_array1 = (0 < fc2_weight).astype(int)[:,::-1]
            
             dut.din.value = int(np.sum(binary_array_din * 2**np.arange(binary_array_din.shape[0]), axis=0))
             dut.weight_0.value = np.sum(binary_array0 * 2**np.arange(binary_array0.shape[1]), axis=1).tolist()
@@ -199,8 +206,9 @@ async def sc_network_tb(dut):
         pc = output / N
         result.append(pc[0])
     
-        print(f"Test {i}:")
-        print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])[0]} \t Prob Output: {pc}")
+        # print(f"Test {i}:")
+        # print(f"Label: {y_test[a+i]} \t Expected Prob: {model(X_test[a+i:a+i+1])[0]} \t Prob Output: {pc}")
+    print("N: ",N)
     print(y_test[a:b].numpy().astype(int))
     print((np.array(result) > 0.5).astype(int))
     print(np.array([y[0] for y in (model(X_test[a:b]) > 0.5)]).astype(int))
