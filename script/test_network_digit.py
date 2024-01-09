@@ -226,7 +226,6 @@ async def sc_network_tb(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 

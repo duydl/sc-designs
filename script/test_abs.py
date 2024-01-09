@@ -5,13 +5,14 @@ from cocotb.triggers import Timer, RisingEdge, FallingEdge, ClockCycles
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import os 
 
 '''
 1. Testbench
 '''
 
 @cocotb.test()
-async def sc_tanh_tb(dut):
+async def sc_abs_tb(dut):
     x_range = np.linspace(0,1,41)
 
     # Set initial input value to prevent it from floating
@@ -41,10 +42,10 @@ async def sc_tanh_tb(dut):
             # print(f"state = {dut.current_state.value}")
             # print(f"nextstate = {dut.next_state.value}")
             y += dut.y.value
-           
+        print(y/N)
         y_range.append(y/N)
 
-    with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out_abs.txt", "w") as f:
+    with open(os.getcwd() + "/../out/out_abs.txt", "w") as f:
         print(list(x_range), file=f)
         print(list(y_range), file=f)
 
@@ -54,17 +55,41 @@ async def sc_tanh_tb(dut):
 2. Pytest Setup
 '''
 
-from cocotb_test.simulator import run
-import pytest
+# from cocotb_test.simulator import run
+# import glob
+
+# def test_abs():
+
+#     run(
+#         verilog_sources=glob.glob('hdl/*'),
+#         toplevel="sc_abs",    # top level HDL
+#         module="test_abs", # name of the file that contains @cocotb.test() -- this file
+#         simulator="icarus"
+#     )
+
+
 import glob
+from cocotb.runner import get_runner
 
+def test_abs():
 
-def test_tanh():
+    verilog_sources = glob.glob('hdl/*') 
+    # proj_path = Path(__file__).resolve().parent.parent
+    
+    # verilog_sources = [proj_path / "hdl" / "sc_abs.sv"]
+    
+    sim = os.getenv("SIM", "icarus")
 
-    run(
-        verilog_sources=glob.glob('hdl/*'),
-        toplevel="sc_abs",    # top level HDL
-        
-        module="test_abs", # name of the file that contains @cocotb.test() -- this file
-        simulator="icarus"
+    runner = get_runner(sim)
+    runner.build(
+        verilog_sources=verilog_sources,
+        hdl_toplevel="sc_abs",
+        always=True,
     )
+    runner.test(
+        hdl_toplevel="sc_abs", test_module="test_abs"
+    )
+
+
+if __name__ == "__main__":
+    test_abs()

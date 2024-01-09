@@ -67,21 +67,47 @@ async def edge_detector(dut):
 2. Pytest Setup
 '''
 
-from cocotb_test.simulator import run
-import pytest
-import glob
+# from cocotb_test.simulator import run
+# import glob
 
 
-def test_edge_detector():
+# def test_edge_detector():
 
-    run(
-        verilog_sources=glob.glob('hdl/*'),
-        toplevel="edge_detector",    # top level HDL
+#     run(
+#         verilog_sources=glob.glob('hdl/*'),
+#         toplevel="edge_detector",    # top level HDL
         
-        module="test_edge_detector", # name of the file that contains @cocotb.test() -- this file
-        simulator="icarus"
+#         module="test_edge_detector", # name of the file that contains @cocotb.test() -- this file
+#         simulator="icarus"
 
-        # parameters=parameters,
-        # extra_env=parameters,
-        # sim_build="sim_build/sc_add/" + ",".join((f"{key}={value}" for key, value in parameters.items())),
-    )
+#         # parameters=parameters,
+#         # extra_env=parameters,
+#         # sim_build="sim_build/sc_add/" + ",".join((f"{key}={value}" for key, value in parameters.items())),
+#     )
+
+
+
+# from pathlib import Path
+# import os, sys, glob
+# from cocotb.runner import get_runner
+
+# def test_():
+
+#     verilog_sources = glob.glob('hdl/*') 
+#     print(verilog_sources)
+    
+#     sim = os.getenv("SIM", "icarus")
+
+#     runner = get_runner(sim)
+#     runner.build(
+#         verilog_sources=verilog_sources,
+#         hdl_toplevel="edge_detector",
+#         always=True,
+#     )
+#     runner.test(
+#         hdl_toplevel="edge_detector", test_module="test_edge_detector"
+#     )
+
+
+# if __name__ == "__main__":
+#     test_()

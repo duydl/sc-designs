@@ -59,7 +59,6 @@ async def sc_pulse_tb(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 

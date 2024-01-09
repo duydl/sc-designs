@@ -55,7 +55,6 @@ async def sc_mux_neuron_tb(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 

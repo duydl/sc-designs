@@ -61,7 +61,6 @@ async def sc_apc_neuron(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 

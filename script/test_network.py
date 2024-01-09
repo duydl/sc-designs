@@ -151,8 +151,6 @@ async def sc_network_tb(dut):
     a, b = 0,20
     result = []
     
-    
-    
     for i, test_image in enumerate(test_images_prob[a:b]):
         N = 1024
         output = 0
@@ -238,7 +236,6 @@ async def sc_network_tb(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 

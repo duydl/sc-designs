@@ -43,7 +43,6 @@ async def sc_accumulator(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 

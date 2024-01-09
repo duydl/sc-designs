@@ -61,7 +61,6 @@ async def sc_add_tb(dut):
 '''
 
 from cocotb_test.simulator import run
-import pytest
 import glob
 
 
