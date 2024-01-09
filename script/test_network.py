@@ -255,3 +255,6 @@ def test_network():
         # extra_env=parameters,
         # sim_build="sim_build/sc_add/" + ",".join((f"{key}={value}" for key, value in parameters.items())),
     )
+    
+    
+    
