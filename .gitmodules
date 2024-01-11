@@ -1,0 +1,7 @@
+[submodule "submodules/UnarySim"]
+	path = submodules/UnarySim
+	url = https://github.com/duydl/UnarySim.git
+
+[submodule "submodules/cocotb"]
+	path = submodules/cocotb
+	url = https://github.com/duydl/cocotb.git
