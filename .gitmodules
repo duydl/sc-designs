@@ -5,3 +5,4 @@
 [submodule "submodules/cocotb"]
 	path = submodules/cocotb
 	url = https://github.com/duydl/cocotb.git
+
