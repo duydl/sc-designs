@@ -35,16 +35,11 @@ async def sc_relu_tb(dut):
             dut.x.value = 1 if random.uniform(0, 1) < x else 0
             
             await RisingEdge(dut.clk)
-            # print(_)
-            # print(f"y = {dut.y.value}")
-            # print(f"x = {dut.x.value}")
-            # print(f"state = {dut.current_state.value}")
-            # print(f"nextstate = {dut.next_state.value}")
             y += dut.y.value
            
         y_range.append(y/N)
 
-    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/out/out_relu.txt", "w") as f:
+    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/out/out_lsm.txt", "w") as f:
         print(list(x_range), file=f)
         print(list(y_range), file=f)
 
