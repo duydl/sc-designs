@@ -64,11 +64,9 @@ https://github.com/AngeloJacobo/FPGA_RealTime_and_Static_Sobel_Edge_Detection
 1. FPGA implementation.
 
 
-Your feedback and input on the findings and direction of the research are greatly appreciated.
 
 
 
+98.7 microW/pixel
 
-
-
-
+2.7 W / 2048*1088 BU205M

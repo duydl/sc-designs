@@ -93,31 +93,58 @@ module sc_relu_2 (
     output logic y
 );
 
-parameter S = 6;
+parameter S = 4;
 reg [S-1:0] current_state, next_state;
 
 always @(posedge clk, posedge reset) begin
     if (reset)
-        current_state <= (2**S)/2; // Initial state
+        current_state <= {1'b1,{(S-1){1'b0}}}; // Initial state
     else
         current_state <= next_state;
 end
 
 always @(current_state, x) begin
+    if (current_state[S-1] == 1'b0)
+        y = ~current_state[0];
+    else
+        y = current_state[0];
+
     case (current_state)
-        0: if (x) next_state = 0; 
-            else next_state = 1;
+        (2**S-1): 
+        if (x) 
+            next_state = current_state; 
+        else 
+            next_state = current_state - 1;
         
         // sub any odd value will result in zero part of relu
-        (2**S-1): next_state = (2**S-1) - 3 ;  // -1, -5, -7 also work. Think about the math of this       
+        0: next_state = 1;  
+        // -1, -5, -7 also work. Think about the math of this       
 
-        default: if (x) next_state = current_state - 1;
-                 else next_state = current_state + 1;
+        default: 
+        if (x) 
+            next_state = current_state + 1;
+        else 
+            next_state = current_state - 1;
     endcase
-    if (current_state[S-1] == 1'b0)
-        y = (current_state[0] == 1'b0);
-    else
-        y = (current_state[0] == 1'b1);
+
+    // case (current_state)
+    //     0: 
+    //     if (x) 
+    //         next_state = 0; 
+    //     else 
+    //         next_state = 1;
+        
+    //     // sub any odd value will result in zero part of relu
+    //     (2**S-1): next_state = (2**S-1) - 1 ;  
+    //     // -1, -5, -7 also work. Think about the math of this       
+
+    //     default: 
+    //     if (x) 
+    //         next_state = current_state - 1;
+    //     else 
+    //         next_state = current_state + 1;
+    // endcase
+
 end
 
 endmodule

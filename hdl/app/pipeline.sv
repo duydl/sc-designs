@@ -226,7 +226,7 @@ module pipeline  #(parameter ADDR_WIDTH = 8, DATA_WIDTH = 32, DEPTH = 16) ( inpu
         .i_read_en(rflag_q), 
         .i_write_en(wflag_q),
         .i_data(data_in_q),
-        .o_data(data_out_q)); 
+        .o_data(data_out_qdata_out_q)); 
 
     qmaxtable qmaxt0(
         .i_clk(clk),

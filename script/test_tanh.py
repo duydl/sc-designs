@@ -47,7 +47,7 @@ async def sc_tanh_tb(dut):
 
     print(x_range)
     print(y_range)
-    with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out_tanh.txt", "w") as f:
+    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/out_tanh.txt", "w") as f:
         print(list(x_range), file=f)
         print(list(y_range), file=f)
 

@@ -44,7 +44,7 @@ async def sc_relu_tb(dut):
            
         y_range.append(y/N)
 
-    with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out/out_relu.txt", "w") as f:
+    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/out/out_relu.txt", "w") as f:
         print(list(x_range), file=f)
         print(list(y_range), file=f)
 
@@ -58,11 +58,31 @@ from cocotb_test.simulator import run
 import glob
 
 
-def test_tanh():
+def test_relu():
 
     run(
-        verilog_sources=glob.glob('hdl/*'),
-        toplevel="sc_relu_2", # top level HDL
+        verilog_sources=glob.glob('submodules/UnarySim/hw/kernel/old/relu/relu.sv'),
+        toplevel="relu", # top level HDL
         module="test_relu", # name of file contains @cocotb.test
         simulator="icarus"
     )
+   
+
+# def test_relu():
+
+#     run(
+#         verilog_sources=glob.glob('hdl/sc_relu_2.sv'),
+#         toplevel="sc_relu_2", # top level HDL
+#         module="test_relu", # name of file contains @cocotb.test
+#         simulator="icarus"
+#     ) 
+    
+
+# def test_abs():
+
+#     run(
+#         verilog_sources=glob.glob('submodules/UnarySim/hw/kernel/abs/Abs.sv'),
+#         toplevel="Abs", # top level HDL
+#         module="test_relu", # name of file contains @cocotb.test
+#         simulator="icarus"
+#     )

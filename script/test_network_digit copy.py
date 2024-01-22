@@ -80,7 +80,7 @@ async def sc_network_tb(dut):
     # Initialize the model
     model = MLPModel(input_size, hidden_size, output_size)
     
-    model.load_state_dict(torch.load('/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/script/model_weights.pth'))  
+    model.load_state_dict(torch.load('/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/model_weights.pth'))  
     model_state_dict = model.state_dict()
 
     test_images_prob = (1 + X_train)/2

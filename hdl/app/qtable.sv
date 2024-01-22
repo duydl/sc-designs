@@ -1,7 +1,3 @@
-`timescale 1ns / 1ps
-//assuming 64states, 4 actions, 256 s+a
-//state: 5:0 action: 1:0    s+a: 7:0 
-//q values stored on BRAM
 module qtable #(parameter ADDR_WIDTH = 8, DATA_WIDTH = 32, DEPTH = 256) (
     input wire i_clk,
     input wire i_rst,

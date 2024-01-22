@@ -60,7 +60,7 @@ async def edge_detector(dut):
             liney.append(s)
         output_image.append(liney)
     
-    with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out_edge_detect.txt", "w") as f:
+    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/out_edge_detect.txt", "w") as f:
         print((output_image), file=f)
 
 '''

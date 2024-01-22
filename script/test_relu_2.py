@@ -43,8 +43,7 @@ async def sc_relu_tb(dut):
             y += dut.y.value
            
         y_range.append(y/N)
-
-    with open("/home/ubuntu20_1/WSL_dev_projs/verilog/sc_designs/out/out_relu_2.txt", "w") as f:
+    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/out/out_relu_2.txt", "w") as f:
         print(list(x_range), file=f)
         print(list(y_range), file=f)
 
