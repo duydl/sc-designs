@@ -101,8 +101,8 @@ async def sc_network_tb(dut):
         await RisingEdge(dut.clk)
 
         dut.din.value = list_to_binary( test_image.apply_(func))
-        dut.bias_0.value = list_to_binary(model_state_dict['fc1.bias'].apply_(func))
-        dut.bias_1.value = list_to_binary(model_state_dict['fc2.bias'].apply_(func))
+        # dut.bias_0.value = list_to_binary(model_state_dict['fc1.bias'].apply_(func))
+        # dut.bias_1.value = list_to_binary(model_state_dict['fc2.bias'].apply_(func))
         dut.weight_0.value = [list_to_binary(x) for x in model_state_dict['fc1.weight'].apply_(func)]
         dut.weight_1.value = [list_to_binary(x) for x in model_state_dict['fc2.weight'].apply_(func)]
 
@@ -115,8 +115,8 @@ async def sc_network_tb(dut):
         for _ in range(N):
 
             dut.din.value = list_to_binary( test_image.apply_(func))
-            dut.bias_0.value = list_to_binary(model_state_dict['fc1.bias'].apply_(func))
-            dut.bias_1.value = list_to_binary(model_state_dict['fc2.bias'].apply_(func))
+            # dut.bias_0.value = list_to_binary(model_state_dict['fc1.bias'].apply_(func))
+            # dut.bias_1.value = list_to_binary(model_state_dict['fc2.bias'].apply_(func))
             dut.weight_0.value = [list_to_binary(x) for x in model_state_dict['fc1.weight'].apply_(func)]
             dut.weight_1.value = [list_to_binary(x) for x in model_state_dict['fc2.weight'].apply_(func)]
 
@@ -166,9 +166,9 @@ def test_network():
 
     run(
         verilog_sources=glob.glob('hdl/*'),
-        toplevel="sc_mnist_network",    # top level HDL
+        toplevel="sc_mnist_network_digit",    # top level HDL
         
-        module="test_network_digit", # name of the file that contains @cocotb.test() -- this file
+        module="test_network_digit_copy", # name of the file that contains @cocotb.test() -- this file
         simulator="icarus"
 
         # parameters=parameters,

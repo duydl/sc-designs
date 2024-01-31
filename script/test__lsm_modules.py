@@ -53,14 +53,14 @@ from cocotb_test.simulator import run
 import glob
 
 
-def test_relu():
+# def test_relu():
 
-    run(
-        verilog_sources=glob.glob('submodules/UnarySim/hw/kernel/old/relu/relu.sv'),
-        toplevel="relu", # top level HDL
-        module="test_relu", # name of file contains @cocotb.test
-        simulator="icarus"
-    )
+#     run(
+#         verilog_sources=glob.glob('submodules/UnarySim/hw/kernel/old/relu/relu.sv'),
+#         toplevel="relu", # top level HDL
+#         module="test_relu", # name of file contains @cocotb.test
+#         simulator="icarus"
+#     )
    
 
 # def test_relu():
@@ -73,11 +73,11 @@ def test_relu():
 #     ) 
     
 
-# def test_abs():
+def test_abs():
 
-#     run(
-#         verilog_sources=glob.glob('submodules/UnarySim/hw/kernel/abs/Abs.sv'),
-#         toplevel="Abs", # top level HDL
-#         module="test_relu", # name of file contains @cocotb.test
-#         simulator="icarus"
-#     )
+    run(
+        verilog_sources=glob.glob('submodules/UnarySim/hw/kernel/abs/Abs.sv'),
+        toplevel="Abs", # top level HDL
+        module="test_relu", # name of file contains @cocotb.test
+        simulator="icarus"
+    )

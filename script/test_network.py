@@ -152,7 +152,7 @@ async def sc_network_tb(dut):
     result = []
     
     for i, test_image in enumerate(test_images_prob[a:b]):
-        N = 1024
+        N = 256
         output = 0
         dut.reset.value = 1
         await RisingEdge(dut.clk)

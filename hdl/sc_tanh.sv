@@ -111,7 +111,7 @@ always @(current_state, x) begin
         default: if (x) next_state = current_state + 1;
                  else next_state = current_state - 1;
     endcase
-    y = (current_state[S-1] == 1'b1); // Output based on odd/even state
+    y = (current_state[S-1] == 1'b1); 
 end
 
 endmodule
