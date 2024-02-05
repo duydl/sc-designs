@@ -7,8 +7,8 @@ module sc_par_edge #(
     input logic clk,
     input logic reset,
     input logic sel,
-    input logic  pixels [0:m*n-1], // m by n input pixels
-    output logic  s [0:m*n-1]// m by n output signals
+    input logic  in_bits [0:m*n-1], // m by n input pixels
+    output logic out_bits [0:m*n-1]// m by n output signals
 );
 
     genvar i, j;
@@ -17,13 +17,12 @@ module sc_par_edge #(
             for (j = 0; j < n-1; j = j + 1) begin
                 sc_robert_op_xor robert_op (
                     .clk(clk),
-                    .rst(reset),
-                    .r00(pixels[(i)*(n)+j]),
-                    .r01(pixels[(i)*(n)+j+1]),
-                    .r10(pixels[(i+1)*(n)+j]),
-                    .r11(pixels[(i+1)*(n)+j+1]), 
+                    .r00(in_bits[(i)*(n)+j]),
+                    .r01(in_bits[(i)*(n)+j+1]),
+                    .r10(in_bits[(i+1)*(n)+j]),
+                    .r11(in_bits[(i+1)*(n)+j+1]), 
                     .sel(sel), 
-                    .s(s[(i)*(n)+j]) 
+                    .result(out_bits[(i)*(n)+j]) 
                 );
             end
         end
