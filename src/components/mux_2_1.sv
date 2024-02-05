@@ -1,9 +1,6 @@
-// sc_add.sv
-
 `timescale 1us/1ns
 
-
-module sc_sub (
+module mux_2_1 (
     input logic clk,
     input logic a,
     input logic b,
@@ -11,11 +8,6 @@ module sc_sub (
     output logic c
   );
 
-
-  always @(posedge clk)
-  begin
-    c <= select ? a : ~b;
-  end
-
+  assign  c = select ? a : b;
 
 endmodule

@@ -1,4 +1,4 @@
-module sc_mnist_network_digit
+module sc_digit_nn
   #(
     // Input
   parameter N0 = 64,

@@ -1,4 +1,4 @@
-module sc_mnist_network_old
+module sc_nn_old
   #(
     // Input
     parameter N0 = 784,

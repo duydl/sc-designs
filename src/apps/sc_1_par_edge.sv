@@ -1,6 +1,6 @@
 `timescale 1us/1ns
 
-module image_processor #(
+module sc_par_edge #(
   parameter m = 32,
   parameter n = 32
   )(
@@ -15,7 +15,7 @@ module image_processor #(
     generate
         for (i = 0; i < m-1; i = i + 1) begin
             for (j = 0; j < n-1; j = j + 1) begin
-                edge_detector_deterministic_xor_abs edd (
+                sc_robert_op_xor robert_op (
                     .clk(clk),
                     .rst(reset),
                     .r00(pixels[(i)*(n)+j]),

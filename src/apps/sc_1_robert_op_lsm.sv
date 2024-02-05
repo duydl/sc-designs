@@ -1,28 +1,27 @@
 
 
-module edge_detector (
+module sc_robert_op_lsm (
     input logic clk,
-    // input logic reset,
+    input logic reset,
     input logic r00, r01, r10, r11, 
     input logic sel,
-    output logic s
+    output logic out
 );
 
     logic t0, t1;
     logic a0, a1;
-    logic result;
 
-    sc_sub sub_x0 (
+    mux_2_1 sub_x0 (
         .clk(clk),
         .a(r00),
-        .b(r11),
+        .b(~r11),
         .select(sel),
         .c(t0)
     );
-    sc_sub sub_x1 (
+    mux_2_1 sub_x1 (
         .clk(clk),
         .a(r10),
-        .b(r01),
+        .b(~r01),
         .select(sel),
         .c(t1)
     );
@@ -41,14 +40,12 @@ module edge_detector (
         .y(a1)
     );
 
-    sc_add add_results (
+    mux_2_1 add (
         .clk(clk),
         .a(a0),
         .b(a1),
         .select(sel),
-        .c(result)
+        .c(out)
     );
-
-    assign s = result;
 
 endmodule
