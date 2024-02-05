@@ -1,7 +1,7 @@
 module lfsr (
     input wire clk,
     input wire rst,
-    output reg [7:0] lfsr_out
+    output wire [7:0] lfsr_out
 );
 
     reg [7:0] lfsr_reg;

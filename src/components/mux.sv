@@ -11,7 +11,6 @@ module sc_add (
     output logic c
   );
 
-
   always @(posedge clk)
   begin
     c <= select ? a : b;
