@@ -1,6 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import Timer, RisingEdge, FallingEdge, ClockCycles
+from cocotb.triggers import RisingEdge
 
 import random
 import numpy as np
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 '''
 
 @cocotb.test()
-async def sc_relu_tb(dut):
+async def tb(dut):
     x_range = np.linspace(0,1,41)
 
     # Set initial input value to prevent it from floating

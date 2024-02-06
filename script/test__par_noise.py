@@ -6,10 +6,19 @@ import numpy as np
 
 from PIL import Image
 
-m, n = 10, 10
+m, n = 256, 256
 # Shape of test image 
 # Params for circuit
 # circuit built before image read
+
+def load_image(file_path):
+    # Load the image using Pillow (PIL)
+    img = Image.open(file_path)
+    
+    # Convert the image to a NumPy array
+    img_array = np.array(img )
+    
+    return img_array
 
 def create_bw_test_image(image_size, square_size=4):
     # Create a simple black and white image
@@ -24,16 +33,11 @@ def create_bw_test_image(image_size, square_size=4):
     # global m,n 
     # m,n = image_size
     
+    from PIL import Image
+    test_img = Image.fromarray(image.astype('uint8'))
+    test_img.save("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/out/test_verilog.png")
+    
     return image
-
-def load_image(file_path):
-    # Load the image using Pillow (PIL)
-    img = Image.open(file_path)
-    
-    # Convert the image to a NumPy array
-    img_array = np.array(img )
-    
-    return img_array
 
 '''
 1. Testbench
@@ -42,8 +46,8 @@ def load_image(file_path):
 @cocotb.test()
 async def tb(dut):
     
-    input_image = create_bw_test_image((m,n)) 
-    # input_image = load_image("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/images/cameraman.png")
+    # input_image = create_bw_test_image((m,n)) 
+    input_image = load_image("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/images/einstein_noisy.png")
     print("Shape: ", (m,n))
 
     clock = Clock(dut.clk, 10, units="ns")  
@@ -62,9 +66,8 @@ async def tb(dut):
     
     for t_ in range(256):
         bits_input = t_ < input_image_flatten
-        print(type(bits_input.astype(int).tolist()))
+
         dut.in_bits.value = bits_input.astype(int).tolist()
-        dut.sel.value = t_ % 2
         
         await RisingEdge(dut.clk)
         
@@ -73,12 +76,12 @@ async def tb(dut):
         
     output_image = output_image.reshape((m),(n))
     
-    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/out/out_edge_detect_deter.txt", "w")  as f:
+    with open("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/out/out_noise_reduce_deter.txt", "w")  as f:
         print((output_image.tolist()), file=f)
         
     from PIL import Image
     edge_img = Image.fromarray(output_image.astype('uint8'))
-    edge_img.save("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/out/cameraman_verilog.png")
+    edge_img.save("/home/ubuntu20_1/Projects_Ubuntu20/sc_designs/script/out/einstein_verilog.png")
     
     import os
     current_directory = os.getcwd()
@@ -95,9 +98,8 @@ from cocotb.runner import get_runner
 def test_():
 
     verilog_sources = [
-        "src/apps/sc_1_par_edge.sv", 
-        "src/apps/sc_1_robert_op_xor.sv", 
-        "src/components/mux_2_1.sv"
+        "src/apps/sc_2_par_noise.sv", 
+        "src/apps/sc_2_median_3x3.sv", 
         ]
     
     sim = os.getenv("SIM", "icarus")
@@ -108,13 +110,13 @@ def test_():
     
     runner.build(
         verilog_sources=verilog_sources,
-        hdl_toplevel="sc_par_edge",
+        hdl_toplevel="sc_par_noise",
         always=True, # always recompile
         parameters={"m":m, "n":n}
     )
     runner.test(
-        hdl_toplevel="sc_par_edge", 
-        test_module="test__par_edge", # this file name,
+        hdl_toplevel="sc_par_noise", 
+        test_module="test__par_noise", # this file name,
     )
 
 if __name__ == "__main__":

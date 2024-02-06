@@ -1,7 +1,6 @@
 `timescale 1us/1ns
 
 module sc_robert_op_xor(
-    input logic clk,
     input logic r00, r01, r10, r11, 
     input logic sel,
     output logic result

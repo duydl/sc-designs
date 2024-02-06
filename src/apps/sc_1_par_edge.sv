@@ -16,7 +16,8 @@ module sc_par_edge #(
         for (i = 0; i < m-1; i = i + 1) begin
             for (j = 0; j < n-1; j = j + 1) begin
                 sc_robert_op_xor robert_op (
-                    .clk(clk),
+                    // .clk(clk),
+                    // .reset(reset),
                     .r00(in_bits[(i)*(n)+j]),
                     .r01(in_bits[(i)*(n)+j+1]),
                     .r10(in_bits[(i+1)*(n)+j]),
