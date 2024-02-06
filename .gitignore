@@ -3,6 +3,7 @@ __pycache__
 .venv
 .vscode
 
+sc_fpga
 sim_build
 archive
 data
