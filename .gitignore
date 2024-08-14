@@ -1,0 +1,6 @@
+.pytest_cache
+archive
+data
+out
+sim_build
+*.pyc
